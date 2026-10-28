@@ -1,0 +1,134 @@
+CONTROLE DE EXTINTORES DE INCENDIO
+====================================
+
+Sistema web para cadastro e acompanhamento de extintores, com controle por
+empresa e por setor de risco. Interface em formato de painel corporativo, com
+menu lateral, indicadores e tabelas.
+
+COMO ABRIR
+----------
+Abra o arquivo index.html no navegador. Nao e preciso instalar nada.
+
+Funciona no Chrome, Edge, Firefox e tambem no celular. Para usar no celular,
+abra a pasta em um servidor local e acesse pelo IP da mesma rede Wi-Fi, ou
+publique a pasta em um servico web.
+
+
+NAVEGACAO
+---------
+O menu lateral possui cinco areas:
+
+- Painel: indicadores do inventario, lista do que exige acao e distribuicao
+  de extintores por setor.
+- Extintores: tabela completa do inventario, com busca, filtro de situacao e
+  ordenacao por qualquer coluna.
+- Setores e locais: cadastro dos ambientes com risco e a cobertura por classe
+  de incendio.
+- Relatorio: resumo pronto para impressao, com campo de assinatura.
+- Modelo em branco: formulario para preencher a mao no local.
+- Empresas: cadastro, edicao, exclusao e selecao da empresa ativa.
+
+
+MODELO DE CADASTRO EM BRANCO
+----------------------------
+Para inspecionar extintores que ainda nao estao no sistema, use a aba
+"Modelo em branco". O formulario sai pronto para preenchimento manual e
+impressao em A4.
+
+Opcoes disponiveis antes de imprimir:
+
+- Vias por folha: 1, 2 ou 4 formularios por folha impressa.
+- Cabecalho da empresa: usa os dados da empresa ativa ou deixa em branco para
+  escrever a mao.
+- Incluir lista de verificacao: os 10 itens de inspecao do extintor.
+- Incluir campo de setor: adiciona o campo de setor ou ambiente. Se voce
+  desligar, entra o campo de classe predominante do local.
+
+O formulario em branco contem:
+
+- Cabecalho com a empresa, CNPJ e responsavel tecnico.
+- Data, folha, via e responsavel pela vistoria.
+- Identificacao: codigo/patrimonio, setor, andar, tipo, capacidade e unidade.
+- Dados tecnicos: fabricante, serie, ano e data de fabricacao, carga e
+  validade.
+- Classes de incendio atendidas, com caixas para marcar.
+- Inspecao de fabrica, sinalizacao e situacao do equipamento.
+- Verificacoes da inspecao, com dez itens de checagem.
+- Controle de manutencao: datas de ultima e proxima inspecao e recarga.
+- Resultado da vistoria e campo de observacoes.
+- Assinatura do vistoriado e do responsavel tecnico.
+
+Para gerar o arquivo PDF, clique em "Imprimir / Salvar em PDF" e escolha a
+opcao "Salvar como PDF" como destino da impressora. Cada via do formulario
+comeca em uma folha nova.
+
+
+FUNCIONALIDADES
+---------------
+- Cadastro de empresas com CNPJ e responsavel tecnico.
+- Edicao e exclusao de empresa, com aviso sobre os extintores vinculados.
+- Selecao da empresa ativa pelo topo da tela ou pela aba Empresas.
+- Cadastro de setores e ambientes com classe de incendio predominante e
+  localizacao (andar ou bloco).
+- Cadastro de extintores: codigo/patrimonio, local, tipo, carga, capacidade,
+  fabricante, serie, ano e data de fabricacao, validade da carga, data da
+  proxima inspecao, classes de incendio atendidas, inspecao de fabrica,
+  sinalizacao, situacao e observacoes.
+- Historico de inspecoes tecnicas, recargas, manutencao e troca de carga, com
+  data, responsavel, resultado e observacoes.
+- Ao registrar recarga ou manutencao, e possivel atualizar a validade da
+  carga e a data da proxima inspecao direto no cadastro do extintor.
+- Alertas automaticos de vencimento com filtro especifico.
+- Busca por codigo, tipo, carga, local ou situacao.
+- Ordenacao da tabela por qualquer coluna, clicando no titulo.
+- Impressao da ficha individual do extintor.
+- Impressao do relatorio com a lista de extintores da empresa, sem o menu.
+- Geracao de formulario em branco para preenchimento manual em campo.
+- Edicao e exclusao de extintores e locais.
+- Aviso na tela apos cada operacao realizada.
+- Persistencia dos dados no navegador via localStorage.
+
+O sistema continua funcionando sem internet: nao usa bibliotecas externas.
+
+
+CONTROLE DE VENCIMENTO
+----------------------
+O sistema classifica cada extintor automaticamente:
+
+- Vencido (vermelho): carga vencida ou inspecao vencida.
+- Atencao (amarelo): faltam 60 dias para a validade da carga ou 30 dias para
+  a proxima inspecao, ou a validade da carga nao foi informada.
+- Em dia (verde): carga e inspecao dentro do prazo.
+- Manutencao / Baixado: conforme a situacao marcada no cadastro.
+
+O cartao vermelho no topo mostra quantos extintores da empresa estao com
+pendencia. Use o filtro "Somente alertas de vencimento" na lista para ver
+apenas esses equipamentos.
+
+
+ORDEM SUGERIDA DE USO
+---------------------
+1. Na aba Empresas, clique em "Nova empresa".
+2. Na aba Setores e locais, cadastre os ambientes com risco.
+3. Em Extintores, use "Novo extintor" no topo para cadastrar os equipamentos.
+4. Clique em "Ficha" na linha do extintor para registrar inspecoes e recargas.
+5. Em Relatorio, clique em "Imprimir relatorio".
+6. Em Modelo em branco, gere o formulario para annotate os extintores novos
+   durante a vistoria.
+
+Observacao: depois de salvar, a janela de cadastro fecha e o inventario e
+atualizado. Para alterar um cadastro, use o botao "Editar" na tabela. Para
+registrar movimentacoes, use o botao "Ficha".
+
+Observacao: o filtro "Em manutencao" na tabela de extintores funciona junto
+com a situacao marcada no cadastro.
+
+
+OBSERVACOES IMPORTANTES
+-----------------------
+- Os dados ficam salvos apenas no navegador e no computador onde o sistema
+  foi usado. Limpar os dados de navegacao apaga os cadastros.
+- Para uso em rede, multiusuario ou com backup, o proximo passo e criar um
+  backend com banco de dados.
+- Antes de excluir um local, o sistema avisa quantos extintores estao
+  vinculados a ele. Os extintores permanecem salvos.

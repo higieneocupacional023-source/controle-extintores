@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Extintores | Sistema de Gestao de Seguranca Contra Incendio</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">EI</div>
+          <div class="brand-text">
+            <strong>Extintores</strong>
+            <span>Seguranca Contra Incendio</span>
+          </div>
+        </div>
+
+        <nav class="nav" aria-label="Navegacao principal">
+          <p class="nav-label">Gestao</p>
+          <button type="button" class="nav-link active" data-view="dashboard">
+            <span class="nav-dot"></span> Painel
+          </button>
+          <button type="button" class="nav-link" data-view="extintores">
+            <span class="nav-dot"></span> Extintores
+          </button>
+          <button type="button" class="nav-link" data-view="locais">
+            <span class="nav-dot"></span> Setores e locais
+          </button>
+          <button type="button" class="nav-link" data-view="relatorio">
+            <span class="nav-dot"></span> Relatorio
+          </button>
+          <button type="button" class="nav-link" data-view="modelo">
+            <span class="nav-dot"></span> Modelo em branco
+          </button>
+
+          <p class="nav-label">Cadastros</p>
+          <button type="button" class="nav-link" data-view="empresas">
+            <span class="nav-dot"></span> Empresas
+          </button>
+        </nav>
+
+        <div class="sidebar-foot">
+          <p>Empresa ativa</p>
+          <strong id="sidebarCompany">Nenhuma</strong>
+        </div>
+      </aside>
+
+      <div class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow" id="viewEyebrow">Visao geral</p>
+            <h1 id="viewTitle">Painel de controle</h1>
+          </div>
+
+          <div class="topbar-tools">
+            <label class="field-inline">
+              <span>Empresa ativa</span>
+              <select id="companySelect"></select>
+            </label>
+            <span class="today" id="todayLabel"></span>
+            <button class="btn btn-primary" type="button" id="newExtintorButton">Novo extintor</button>
+          </div>
+        </header>
+
+        <main class="content">
+          <section class="view active" id="view-dashboard">
+            <div class="kpi-grid">
+              <article class="kpi">
+                <p class="kpi-label">Extintores no inventario</p>
+                <p class="kpi-value" id="totalExtintores">0</p>
+                <p class="kpi-foot" id="kpiExtintoresFoot">0 em uso</p>
+              </article>
+
+              <article class="kpi">
+                <p class="kpi-label">Em dia</p>
+                <p class="kpi-value" id="totalEmDia">0</p>
+                <p class="kpi-foot">Carga e inspecao dentro do prazo</p>
+              </article>
+
+              <article class="kpi kpi-warn">
+                <p class="kpi-label">Atencao</p>
+                <p class="kpi-value" id="totalAtencao">0</p>
+                <p class="kpi-foot">Prazo proximo ou dados incompletos</p>
+              </article>
+
+              <article class="kpi kpi-danger">
+                <p class="kpi-label">Pendencias</p>
+                <p class="kpi-value" id="totalVencidos">0</p>
+                <p class="kpi-foot">Carga ou inspecao vencida</p>
+              </article>
+            </div>
+
+            <div class="grid-2">
+              <section class="panel">
+                <div class="panel-head">
+                  <h2>Itens que exigem acao</h2>
+                  <button class="btn btn-ghost btn-sm" type="button" data-go="extintores">Ver todos</button>
+                </div>
+                <div id="dashboardPendencias" aria-live="polite"></div>
+              </section>
+
+              <section class="panel">
+                <div class="panel-head">
+                  <h2>Distribuicao por setor</h2>
+                </div>
+                <div id="dashboardDistribuicao" aria-live="polite"></div>
+              </section>
+            </div>
+          </section>
+
+          <section class="view" id="view-extintores">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Extintores cadastrados</h2>
+                  <p class="panel-sub" id="extintoresSubtitle"></p>
+                </div>
+                <div class="panel-tools">
+                  <label class="field-inline">
+                    <span>Buscar</span>
+                    <input id="searchInput" type="search" placeholder="Codigo, tipo, carga, local" />
+                  </label>
+                  <label class="field-inline">
+                    <span>Situacao</span>
+                    <select id="filterSituacao">
+                      <option value="Todos">Todos</option>
+                      <option value="Em uso">Em uso</option>
+                      <option value="Em manutencao">Em manutencao</option>
+                      <option value="Baixado">Baixado</option>
+                      <option value="Alerta">Somente pendencias e alertas</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              <div id="extintorList" aria-live="polite"></div>
+            </section>
+          </section>
+
+          <section class="view" id="view-locais">
+            <div class="grid-2">
+              <section class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>Setores e ambientes</h2>
+                    <p class="panel-sub">Ambientes com risco de incendio cadastrados na empresa.</p>
+                  </div>
+                  <button class="btn btn-primary btn-sm" type="button" id="newPlaceButton">Novo local</button>
+                </div>
+                <div id="placeList" aria-live="polite"></div>
+              </section>
+
+              <section class="panel">
+                <div class="panel-head">
+                  <div>
+                    <h2>Cobertura por classe</h2>
+                    <p class="panel-sub">Quantos extintores atendem a cada classe de incendio.</p>
+                  </div>
+                </div>
+                <div id="classCoverage" aria-live="polite"></div>
+              </section>
+            </div>
+          </section>
+
+          <section class="view" id="view-relatorio">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Relatorio de controle</h2>
+                  <p class="panel-sub">Resumo do inventario e das pendencias da empresa ativa.</p>
+                </div>
+                <div class="panel-tools">
+                  <button class="btn btn-ghost" type="button" id="printReportButton">Imprimir relatorio</button>
+                </div>
+              </div>
+
+              <div id="reportBody"></div>
+            </section>
+          </section>
+
+          <section class="view" id="view-modelo">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Modelo de cadastro em branco</h2>
+                  <p class="panel-sub">
+                    Formulario pronto para imprimir e preencher a mao no local. Use quando o
+                    extinguishor ainda nao foi cadastrado no sistema.
+                  </p>
+                </div>
+                <div class="panel-tools">
+                  <button class="btn btn-ghost" type="button" id="printModeloButton">Imprimir / Salvar em PDF</button>
+                </div>
+              </div>
+
+              <div class="form-grid" style="max-width: 760px">
+                <label>
+                  Vias por folha
+                  <select id="modeloVias">
+                    <option value="1">1 via</option>
+                    <option value="2" selected>2 vias</option>
+                    <option value="4">4 vias</option>
+                  </select>
+                </label>
+
+                <label>
+                  Cabecalho da empresa
+                  <select id="modeloEmpresa">
+                    <option value="ativa" selected>Usar empresa ativa</option>
+                    <option value="sem">Sem cabecalho</option>
+                  </select>
+                </label>
+
+                <label class="checkbox-option" style="align-self:end">
+                  <input type="checkbox" id="modeloChecklist" checked />
+                  Incluir lista de verificacao
+                </label>
+
+                <label class="checkbox-option" style="align-self:end">
+                  <input type="checkbox" id="modeloSetor" checked />
+                  Incluir campo de setor
+                </label>
+              </div>
+
+              <p class="panel-sub" style="margin: 1rem 0 0.5rem">
+                No relatorio de impressao escolha "Salvar como PDF" como destino para gerar o
+                arquivo, ou imprima direto em folha A4.
+              </p>
+
+              <div id="modeloPreview" class="modelo-preview"></div>
+            </section>
+          </section>
+
+          <section class="view" id="view-empresas">
+            <section class="panel">
+              <div class="panel-head">
+                <div>
+                  <h2>Empresas atendidas</h2>
+                  <p class="panel-sub">Cada empresa possui seu proprio inventario de extintores e setores.</p>
+                </div>
+                <button class="btn btn-primary btn-sm" type="button" id="newCompanyButton">Nova empresa</button>
+              </div>
+
+              <div id="companyList" aria-live="polite"></div>
+            </section>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="modal" id="extintorModal" aria-hidden="true">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-dialog modal-lg" role="dialog" aria-labelledby="extintorModalTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Inventario</p>
+            <h2 id="extintorModalTitle">Dados do extintor</h2>
+          </div>
+          <button class="icon-btn" type="button" data-close aria-label="Fechar">&times;</button>
+        </div>
+
+        <form id="extintorForm" autocomplete="off" class="modal-body form-grid">
+          <input type="hidden" id="extintorId" />
+
+          <label>
+            Codigo / patrimonio
+            <input id="codigo" name="codigo" type="text" required placeholder="Ex.: EXT-001" />
+          </label>
+
+          <label>
+            Local instalado
+            <select id="local" name="local"></select>
+          </label>
+
+          <label>
+            Tipo de extintor
+            <select id="tipo" name="tipo">
+              <option value="Portatil">Portatil</option>
+              <option value="Sobre rodas">Sobre rodas</option>
+              <option value="Carrinho">Carrinho</option>
+              <option value="Tipo coluna">Tipo coluna</option>
+              <option value="Tambor">Tambor</option>
+            </select>
+          </label>
+
+          <label>
+            Situacao
+            <select id="situacao" name="situacao">
+              <option value="Em uso">Em uso</option>
+              <option value="Em manutencao">Em manutencao</option>
+              <option value="Baixado">Baixado</option>
+            </select>
+          </label>
+
+          <label>
+            Carga / agente extintor
+            <select id="carga" name="carga">
+              <option value="Pó quimico seco (BC)">Pó quimico seco (BC)</option>
+              <option value="Pó quimico seco (ABC)">Pó quimico seco (ABC)</option>
+              <option value="Pó especial">Pó especial</option>
+              <option value="Dioxido de carbono (CO2)">Dioxido de carbono (CO2)</option>
+              <option value="Espuma">Espuma</option>
+              <option value="Agua pressurizada">Agua pressurizada</option>
+              <option value="Solucao alcalina">Solucao alcalina</option>
+              <option value="Gel">Gel</option>
+            </select>
+          </label>
+
+          <label>
+            Capacidade
+            <input id="capacidade" name="capacidade" type="text" placeholder="Ex.: 10" />
+          </label>
+
+          <label>
+            Unidade
+            <select id="unidade" name="unidade">
+              <option value="kg">kg</option>
+              <option value="L">L</option>
+            </select>
+          </label>
+
+          <label>
+            Ano de fabricacao
+            <input id="anoFabricacao" name="anoFabricacao" type="number" min="1980" max="2100" placeholder="Ex.: 2023" />
+          </label>
+
+          <label>
+            Fabricante
+            <input id="fabricante" name="fabricante" type="text" placeholder="Ex.: Firetec" />
+          </label>
+
+          <label>
+            Numero de serie
+            <input id="serie" name="serie" type="text" placeholder="Ex.: 88213" />
+          </label>
+
+          <label>
+            Data de fabricacao
+            <input id="dataFabricacao" name="dataFabricacao" type="date" />
+          </label>
+
+          <label>
+            Validade da carga
+            <input id="validadeCarga" name="validadeCarga" type="date" />
+          </label>
+
+          <label>
+            Proxima inspecao
+            <input id="proximaInspecao" name="proximaInspecao" type="date" />
+          </label>
+
+          <label>
+            Inspecao de fabrica
+            <select id="inspecaoFabrica" name="inspecaoFabrica">
+              <option value="Nao informado">Nao informado</option>
+              <option value="Sim">Sim</option>
+              <option value="Nao">Nao</option>
+            </select>
+          </label>
+
+          <label>
+            Sinalizacao (placa)
+            <select id="sinalizacao" name="sinalizacao">
+              <option value="Nao informado">Nao informado</option>
+              <option value="Sim">Sim</option>
+              <option value="Nao">Nao</option>
+            </select>
+          </label>
+
+          <fieldset class="checkbox-panel span-2">
+            <legend>Classes de incendio atendidas</legend>
+            <div class="checkbox-grid">
+              <label class="checkbox-option"><input type="checkbox" name="classes" value="A" /> Classe A</label>
+              <label class="checkbox-option"><input type="checkbox" name="classes" value="B" /> Classe B</label>
+              <label class="checkbox-option"><input type="checkbox" name="classes" value="C" /> Classe C</label>
+              <label class="checkbox-option"><input type="checkbox" name="classes" value="K" /> Classe K</label>
+            </div>
+          </fieldset>
+
+          <label class="span-full">
+            Observacoes
+            <textarea id="observacoes" name="observacoes" rows="3" placeholder="Informacoes complementares sobre o extintor"></textarea>
+          </label>
+
+          <div class="modal-foot span-full">
+            <button type="button" class="btn btn-danger hidden" id="deleteButton">Excluir extintor</button>
+            <span class="spacer"></span>
+            <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar extintor</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="placeModal" aria-hidden="true">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-dialog" role="dialog" aria-labelledby="placeModalTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Areas de risco</p>
+            <h2 id="placeModalTitle">Novo setor ou ambiente</h2>
+          </div>
+          <button class="icon-btn" type="button" data-close aria-label="Fechar">&times;</button>
+        </div>
+
+        <form id="placeForm" autocomplete="off" class="modal-body form-grid">
+          <input type="hidden" id="placeId" />
+
+          <label class="span-full">
+            Setor ou ambiente
+            <input id="placeNome" name="placeNome" type="text" required placeholder="Ex.: Almoxarifado de solventes" />
+          </label>
+
+          <label>
+            Classe de incendio predominante
+            <select id="placeClasse" name="placeClasse">
+              <option value="A">A - Solidos inflamaveis</option>
+              <option value="B">B - Liquidos inflamaveis</option>
+              <option value="C">C - Equipamentos eletricos</option>
+              <option value="K">K - Materiais de cozinha</option>
+              <option value="AB">A e B - Solidos e liquidos</option>
+              <option value="ABC">A, B e C - Uso geral</option>
+              <option value="Nao classificado">Nao classificado</option>
+            </select>
+          </label>
+
+          <label>
+            Andar ou bloco
+            <input id="placeAndar" name="placeAndar" type="text" placeholder="Ex.: Bloco B - Terreo" />
+          </label>
+
+          <label class="span-full">
+            Observacoes do local
+            <input id="placeObservacoes" name="placeObservacoes" type="text" placeholder="Ex.: Area com produtos inflamaveis" />
+          </label>
+
+          <div class="modal-foot span-full">
+            <button type="button" class="btn btn-danger hidden" id="deletePlaceButton">Excluir local</button>
+            <span class="spacer"></span>
+            <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar local</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="companyModal" aria-hidden="true">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-dialog" role="dialog" aria-labelledby="companyModalTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Cadastros</p>
+            <h2 id="companyModalTitle">Nova empresa</h2>
+          </div>
+          <button class="icon-btn" type="button" data-close aria-label="Fechar">&times;</button>
+        </div>
+
+        <form id="companyForm" autocomplete="off" class="modal-body form-grid">
+          <input type="hidden" id="companyId" />
+
+          <label class="span-full">
+            Nome da empresa
+            <input id="empresaNome" name="empresaNome" type="text" required placeholder="Ex.: Metalurgica Alfa" />
+          </label>
+
+          <label>
+            CNPJ
+            <input id="empresaCnpj" name="empresaCnpj" type="text" placeholder="00.000.000/0000-00" />
+          </label>
+
+          <label>
+            Responsavel tecnico
+            <input id="empresaResponsavel" name="empresaResponsavel" type="text" placeholder="Nome do responsavel" />
+          </label>
+
+          <div class="modal-foot span-full">
+            <button type="button" class="btn btn-danger hidden" id="deleteCompanyButton">Excluir empresa</button>
+            <span class="spacer"></span>
+            <button type="button" class="btn btn-ghost" data-close>Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar empresa</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="detailModal" aria-hidden="true">
+      <div class="modal-backdrop" data-close></div>
+      <div class="modal-dialog modal-lg" role="dialog" aria-labelledby="detailModalTitle">
+        <div class="modal-head">
+          <div>
+            <p class="eyebrow">Ficha do equipamento</p>
+            <h2 id="detailModalTitle">Controle do extintor</h2>
+          </div>
+          <div class="panel-tools">
+            <button class="btn btn-ghost btn-sm" type="button" id="printButton">Imprimir</button>
+            <button class="icon-btn" type="button" data-close aria-label="Fechar">&times;</button>
+          </div>
+        </div>
+
+        <div class="modal-body">
+          <article id="detailsCard" class="detail-sheet">
+            <div class="detail-hero">
+              <div>
+                <p class="status-pill" id="detailSituacao">Em uso</p>
+                <h3 id="detailCodigo"></h3>
+                <p id="detailResumo" class="muted"></p>
+              </div>
+              <div class="alert-badge hidden" id="detailAlertBadge">pendencia</div>
+            </div>
+
+            <dl class="info-grid">
+              <div><dt>Empresa</dt><dd id="detailEmpresa"></dd></div>
+              <div><dt>Local</dt><dd id="detailLocal"></dd></div>
+              <div><dt>Tipo</dt><dd id="detailTipo"></dd></div>
+              <div><dt>Capacidade</dt><dd id="detailCapacidade"></dd></div>
+              <div><dt>Carga</dt><dd id="detailCarga"></dd></div>
+              <div><dt>Classe atendida</dt><dd id="detailClasses"></dd></div>
+              <div><dt>Fabricante</dt><dd id="detailFabricante"></dd></div>
+              <div><dt>Serie</dt><dd id="detailSerie"></dd></div>
+              <div><dt>Fabricacao</dt><dd id="detailFabricacao"></dd></div>
+              <div><dt>Validade da carga</dt><dd id="detailValidade"></dd></div>
+              <div><dt>Proxima inspecao</dt><dd id="detailInspecao"></dd></div>
+              <div><dt>Inspecao de fabrica</dt><dd id="detailInspecaoFabrica"></dd></div>
+              <div><dt>Sinalizacao</dt><dd id="detailSinalizacao"></dd></div>
+            </dl>
+
+            <div class="detail-block">
+              <strong>Ultima movimentacao</strong>
+              <p id="detailUltimaMovimentacao"></p>
+            </div>
+            <div class="detail-block">
+              <strong>Observacoes</strong>
+              <p id="detailObservacoes"></p>
+            </div>
+          </article>
+
+          <form id="historyForm" autocomplete="off" class="history-form">
+            <div class="panel-head">
+              <div>
+                <h3>Registrar inspecao ou recarga</h3>
+                <p class="panel-sub">Preencha a nova validade e a proxima inspecao para atualizar o cadastro.</p>
+              </div>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                Tipo de registro
+                <select id="historyTipo" name="historyTipo">
+                  <option value="Inspecao tecnica">Inspecao tecnica</option>
+                  <option value="Recarga">Recarga</option>
+                  <option value="Manutencao">Manutencao</option>
+                  <option value="Troca de carga">Troca de carga</option>
+                </select>
+              </label>
+
+              <label>
+                Data
+                <input id="historyData" name="historyData" type="date" required />
+              </label>
+
+              <label>
+                Executado por
+                <input id="historyExecutado" name="historyExecutado" type="text" placeholder="Empresa ou tecnico" />
+              </label>
+
+              <label>
+                Resultado
+                <select id="historyResultado" name="historyResultado">
+                  <option value="Conforme">Conforme</option>
+                  <option value="Reparo necessario">Reparo necessario</option>
+                  <option value="Nao aprovado">Nao aprovado</option>
+                </select>
+              </label>
+
+              <label>
+                Nova validade da carga
+                <input id="historyValidade" name="historyValidade" type="date" />
+              </label>
+
+              <label>
+                Nova data da proxima inspecao
+                <input id="historyProxima" name="historyProxima" type="date" />
+              </label>
+
+              <label class="span-full">
+                Observacoes do registro
+                <input id="historyObservacoes" name="historyObservacoes" type="text" placeholder="Ex.: Troca do manometro" />
+              </label>
+            </div>
+
+            <div class="modal-foot">
+              <span class="spacer"></span>
+              <button type="submit" class="btn btn-primary">Registrar movimentacao</button>
+            </div>
+          </form>
+
+          <div class="history-list" id="historyList" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
